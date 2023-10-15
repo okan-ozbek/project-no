@@ -1,18 +1,42 @@
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using GenericStateMachine;
+using Player.States;
 using UnityEngine;
 
-public class PlayerStateMachine : MonoBehaviour
+namespace Player
 {
-    // Start is called before the first frame update
-    void Start()
+    [RequireComponent(typeof(PlayerController))]
+    public sealed class PlayerStateMachine : StateManager<PlayerStateEnum>
     {
+        private PlayerController _controller;
         
-    }
+        protected override void Start()
+        {
+            _controller = GetComponent<PlayerController>();
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+            SetStates();
+            
+            CurrentState = States[PlayerStateEnum.Fall];
+            
+            base.Start();
+        }
+
+        protected override void Update()
+        {
+            base.Update();
+            
+            print(CurrentState);
+        }
+
+        private void SetStates()
+        {
+            States = new Dictionary<PlayerStateEnum, BaseState<PlayerStateEnum>>
+            {
+                { PlayerStateEnum.Idle, new PlayerIdleState(_controller) },
+                { PlayerStateEnum.Fall, new PlayerFallState(_controller) },
+                { PlayerStateEnum.Jump, new PlayerJumpState(_controller) },
+                { PlayerStateEnum.Run, new PlayerRunState(_controller) }
+            };
+        }
     }
 }
